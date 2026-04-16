@@ -26,6 +26,8 @@ class RuntimeBoundary:
 class RuntimeState:
     objective: str | None = None
     next_action: str | None = None
+    session_id: str = "local-shell"
+    workspace_status: str = "idle"
     updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
@@ -36,6 +38,8 @@ def readiness_snapshot(boundary: RuntimeBoundary, state: RuntimeState) -> dict:
         "durable_store": boundary.durable_store,
         "control_plane_enabled": boundary.control_plane_enabled,
         "execution_graph_enabled": boundary.execution_graph_enabled,
+        "session_id": state.session_id,
+        "workspace_status": state.workspace_status,
         "objective": state.objective,
         "next_action": state.next_action,
         "updated_at": state.updated_at,

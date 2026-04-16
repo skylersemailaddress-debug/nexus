@@ -1,16 +1,15 @@
 # Launch Readiness Report
 
-## Tranche: First Runnable Nexus Foundation
+## Tranche: First Interactive Nexus Shell
 Date: 2026-04-16
 Branch: main
 
 ### Completed
-- Runnable web shell foundation in apps/web.
-- Deterministic local API service in apps/api with /health, /readiness, /version.
-- Initial runtime boundary and runtime service package modules.
-- Strengthened control-plane scaffolds for approvals, checkpoints, and registry.
-- Coherent execution-graph module shape for run, task, and checkpoint envelope.
-- Deterministic unit tests for shell structure, API endpoints, and module coherence.
+- Runnable web shell now renders linked workspace, system, and activity panels.
+- Deterministic local API service in apps/api now serves /health, /readiness, /version, and /workspace/status.
+- Runtime boundary and runtime service now surface session and workspace state into the API flow.
+- Control-plane and execution-graph expose initial status models for checkpoint, approval, and run visibility.
+- Deterministic unit tests cover shell wiring, API status behavior, and module coherence across the new flow.
 
 ### Validation Gates
 - scripts/validate_local.sh
@@ -18,5 +17,6 @@ Branch: main
 - scripts/package_release.sh
 
 ### Residual Gaps
-- Runtime and execution graph are still foundation-level and not full orchestration.
-- API endpoints are intentionally minimal and deterministic in this tranche.
+- Workspace flow is read-only and intentionally deterministic.
+- Runtime and execution graph remain foundation-level and do not yet execute real orchestration.
+- API endpoints remain intentionally minimal in this tranche.

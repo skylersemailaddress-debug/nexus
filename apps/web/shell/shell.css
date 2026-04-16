@@ -4,7 +4,7 @@ body {
   margin: 0;
   background: var(--nexus-bg);
   color: var(--nexus-text);
-  font-family: Inter, Arial, sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
 }
 
 * {
@@ -45,14 +45,15 @@ body {
 
 .surface-layer {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.85fr);
+  align-items: start;
+  gap: 18px;
   min-height: 420px;
 }
 
 .surface {
-  width: min(920px, 94vw);
+  width: 100%;
   background: linear-gradient(180deg, rgba(18, 25, 53, 0.96), rgba(18, 25, 53, 0.9));
   border: 1px solid var(--nexus-border);
   border-radius: var(--nexus-radius);
@@ -82,6 +83,57 @@ body {
   color: var(--nexus-muted);
   line-height: 1.55;
   margin-bottom: 18px;
+}
+
+.intro-surface {
+  min-height: 100%;
+}
+
+.status-surface {
+  min-height: 0;
+}
+
+.panel-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.status-card,
+.activity-item,
+.mini-surface {
+  border: 1px solid var(--nexus-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.status-card p,
+.activity-item p,
+.mini-surface p {
+  margin: 6px 0 0;
+  color: var(--nexus-muted);
+  line-height: 1.5;
+}
+
+.status-card strong,
+.mini-surface strong {
+  display: block;
+}
+
+.micro-pill {
+  border-radius: 999px;
+  border: 1px solid var(--nexus-border);
+  color: var(--nexus-muted);
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.activity-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
 }
 
 .quick-actions {
@@ -176,13 +228,14 @@ body {
 }
 
 .mini-surface {
-  border: 1px solid var(--nexus-border);
-  border-radius: 12px;
-  padding: 10px;
   margin-bottom: 10px;
 }
 
 @media (max-width: 900px) {
+  .surface-layer {
+    grid-template-columns: 1fr;
+  }
+
   .composer-shell {
     grid-template-columns: 1fr;
   }

@@ -15,9 +15,28 @@ class ModuleCoherenceTests(unittest.TestCase):
             execution_graph_enabled=True,
         )
         service = RuntimeService(boundary=boundary, state=RuntimeState())
+        service.activate_session("Ship the first workspace flow")
         status = service.status()
         self.assertTrue(status["ok"])
         self.assertEqual(status["durable_store"], "postgres")
+        self.assertEqual(status["workspace_status"], "active")
+
+    def test_runtime_composes_workspace_status(self) -> None:
+        boundary = RuntimeBoundary(
+            authority_owner="nexus",
+            durable_store="postgres",
+            control_plane_enabled=True,
+            execution_graph_enabled=True,
+        )
+        service = RuntimeService(boundary=boundary, state=RuntimeState())
+        service.activate_session("Surface state")
+        workspace = service.workspace_status(
+            {"control_status": "stable", "checkpoint_status": "primed"},
+            {"status": "active", "task_count": 2},
+        )
+        self.assertTrue(workspace["ok"])
+        self.assertEqual(workspace["control"]["control_status"], "stable")
+        self.assertEqual(workspace["execution"]["status"], "active")
 
     def test_control_plane_module_loads(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -30,6 +49,20 @@ class ModuleCoherenceTests(unittest.TestCase):
         spec.loader.exec_module(module)  # type: ignore[union-attr]
         self.assertTrue(hasattr(module, "ApprovalRequest"))
         self.assertTrue(hasattr(module, "approve"))
+
+    def test_control_plane_status_model_loads(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        module_path = root / "packages" / "control-plane" / "status.py"
+        spec = util.spec_from_file_location("control_plane_status", module_path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)  # type: ignore[union-attr]
+        state = module.ControlPlaneState(approvals_pending=1, approvals_required=True)
+        snapshot = state.snapshot()
+        self.assertEqual(snapshot["approvals_pending"], 1)
+        self.assertTrue(snapshot["approvals_required"])
 
     def test_execution_graph_module_shape(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -44,6 +77,8 @@ class ModuleCoherenceTests(unittest.TestCase):
         run_plan.add_task("task-1")
         snapshot = run_plan.snapshot()
         self.assertEqual(snapshot["task_count"], 1)
+        run_state = run_plan.to_run_state(status="active")
+        self.assertEqual(run_state.snapshot()["status"], "active")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@
         <strong id="contextTitle">Nexus Build</strong>
       </div>
       <div class="context-meta">
-        <span class="status-pill">Reference</span>
+        <span class="status-pill" id="shellModePill">Linking</span>
       </div>
     </header>
 
@@ -27,7 +27,7 @@
           <button class="ghost-button" data-action="show-help">What can I do?</button>
         </div>
         <p class="surface-copy">
-          Chat is the control surface. Documents, previews, approvals, and results appear only when invoked.
+          Chat is still the control surface. This tranche exposes the first live workspace status path from shell to API.
         </p>
         <div class="quick-actions">
           <button class="quick-chip" data-seed="Build the app">Build the app</button>
@@ -35,6 +35,30 @@
           <button class="quick-chip" data-seed="Show validator results">Validate</button>
           <button class="quick-chip" data-seed="Continue where we left off">Continue</button>
         </div>
+      </section>
+
+      <section class="surface card status-surface" aria-live="polite">
+        <div class="surface-header">
+          <h2>Workspace Session</h2>
+          <span class="micro-pill" id="workspaceStateBadge">Idle</span>
+        </div>
+        <div class="panel-stack" id="workspaceStatusPanel"></div>
+      </section>
+
+      <section class="surface card status-surface" aria-live="polite">
+        <div class="surface-header">
+          <h2>System Surface</h2>
+          <span class="micro-pill" id="systemStateBadge">Pending</span>
+        </div>
+        <div class="panel-stack" id="systemStatusPanel"></div>
+      </section>
+
+      <section class="surface card status-surface">
+        <div class="surface-header">
+          <h2>Activity</h2>
+          <span class="micro-pill">Local</span>
+        </div>
+        <ul class="activity-feed" id="activityFeed"></ul>
       </section>
     </main>
 
