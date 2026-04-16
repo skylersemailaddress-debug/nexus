@@ -14,6 +14,7 @@ const workspaceRoot = "./";
 const apiBaseUrl = "http://127.0.0.1:8085";
 const workspaceStatusPath = "/workspace/status";
 const sessionStatusPath = "/session/status";
+const sessionCommandPath = "/session/command";
 const activityLog = [];
 
 function escapeHtml(value) {
@@ -87,6 +88,27 @@ function renderSessionStatus(payload) {
   workspaceStateBadge.textContent = session.workspace_status || "idle";
 }
 
+function renderCommandSession(payload) {
+  const request = payload.request || {};
+  const response = payload.response || {};
+  const session = payload.session || {};
+  const control = payload.control || {};
+  const execution = payload.execution || {};
+
+  contextTitle.textContent = session.objective || "Nexus Build";
+  workspaceStateBadge.textContent = session.workspace_status || "active";
+  shellModePill.textContent = payload.ok ? "Linked" : "Offline";
+  systemStateBadge.textContent = payload.ok ? "ready" : "blocked";
+
+  workspaceStatusPanel.innerHTML = [
+    statusCard("Request", request.command || "noop", request.command_id || "cmd-0000"),
+    statusCard("Response", response.message || "No response", response.echo || ""),
+    statusCard("Session", `Commands ${session.command_count || 0}`, session.next_action || "Awaiting next action."),
+    statusCard("Execution", execution.status || "queued", `${execution.run_id || "run-command"} / ${execution.task_id || "task-command"}`),
+    statusCard("Control", control.command_status || "accepted", `Review required: ${control.review_required ? "yes" : "no"}`),
+  ].join("");
+}
+
 function renderSystemFallback(health, readiness, version) {
   shellModePill.textContent = "Linked";
   systemStateBadge.textContent = readiness.status || "ready";
@@ -119,6 +141,20 @@ async function fetchJson(path) {
   return response.json();
 }
 
+async function postJson(path, payload) {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Request failed for ${path} with ${response.status}`);
+  }
+  return response.json();
+}
+
 async function refreshWorkspaceStatus(objective) {
   try {
     const [health, readiness, version, session, workspace] = await Promise.all([
@@ -138,12 +174,28 @@ async function refreshWorkspaceStatus(objective) {
   }
 }
 
+async function submitCommand(command) {
+  try {
+    const [health, readiness, version, commandSession] = await Promise.all([
+      fetchJson("/health"),
+      fetchJson("/readiness"),
+      fetchJson("/version"),
+      postJson(sessionCommandPath, { command }),
+    ]);
+    renderSystemFallback(health, readiness, version);
+    renderCommandSession(commandSession);
+    pushActivity("Command submitted", `${commandSession.request?.command_id || "cmd"}: ${command}`);
+  } catch (_) {
+    renderOfflineState();
+    pushActivity("Command failed", "API command/session surface not reachable.");
+  }
+}
+
 function sendPrompt(seed) {
   const prompt = seed || composerInput.value.trim();
   if (!prompt) return;
   composerInput.value = "";
-  pushActivity("Objective updated", prompt);
-  refreshWorkspaceStatus(prompt);
+  submitCommand(prompt);
 }
 
 sendButton.addEventListener("click", () => sendPrompt());

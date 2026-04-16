@@ -55,6 +55,24 @@ class ModuleCoherenceTests(unittest.TestCase):
         self.assertEqual(session["control"]["approval_status"], "clear")
         self.assertEqual(session["execution"]["phase"], "execution")
 
+    def test_runtime_submit_command(self) -> None:
+        boundary = RuntimeBoundary(
+            authority_owner="nexus",
+            durable_store="postgres",
+            control_plane_enabled=True,
+            execution_graph_enabled=True,
+        )
+        service = RuntimeService(boundary=boundary, state=RuntimeState())
+        payload = service.submit_command(
+            "Run checks",
+            {"command_id": "cmd-0001", "command_status": "accepted"},
+            {"run_id": "run-run-checks", "task_id": "task-cmd-0001", "status": "queued"},
+        )
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["request"]["command_id"], "cmd-0001")
+        self.assertEqual(payload["session"]["command_count"], 1)
+        self.assertEqual(payload["session"]["last_command"], "Run checks")
+
     def test_control_plane_module_loads(self) -> None:
         root = Path(__file__).resolve().parents[1]
         module_path = root / "packages" / "control-plane" / "approvals.py"
@@ -82,6 +100,9 @@ class ModuleCoherenceTests(unittest.TestCase):
         self.assertTrue(snapshot["approvals_required"])
         session_snapshot = module.session_control_snapshot(state)
         self.assertEqual(session_snapshot["approval_status"], "waiting")
+        command_snapshot = module.command_control_snapshot("cmd-0001")
+        self.assertEqual(command_snapshot["command_id"], "cmd-0001")
+        self.assertEqual(command_snapshot["command_status"], "accepted")
 
     def test_execution_graph_module_shape(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -100,6 +121,8 @@ class ModuleCoherenceTests(unittest.TestCase):
         self.assertEqual(run_state.snapshot()["status"], "active")
         run_session = module.build_run_session_state(run_state)
         self.assertEqual(run_session.snapshot()["phase"], "execution")
+        command_run = module.build_command_run_state("cmd-0001", "Run checks")
+        self.assertEqual(command_run.snapshot()["task_id"], "task-cmd-0001")
 
 
 if __name__ == "__main__":

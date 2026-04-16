@@ -41,6 +41,22 @@ class ControlPlaneSessionState:
         }
 
 
+@dataclass(frozen=True)
+class CommandControlState:
+    command_id: str
+    command_status: str = "accepted"
+    control_status: str = "stable"
+    review_required: bool = False
+
+    def snapshot(self) -> dict:
+        return {
+            "command_id": self.command_id,
+            "command_status": self.command_status,
+            "control_status": self.control_status,
+            "review_required": self.review_required,
+        }
+
+
 def control_plane_snapshot(state: ControlPlaneState | None = None) -> dict:
     return (state or ControlPlaneState()).snapshot()
 
@@ -54,3 +70,13 @@ def session_control_snapshot(state: ControlPlaneState | None = None) -> dict:
         control_status=current.control_status,
     )
     return session_state.snapshot()
+
+
+def command_control_snapshot(command_id: str, ready: bool = True) -> dict:
+    command_state = CommandControlState(
+        command_id=command_id,
+        command_status="accepted" if ready else "blocked",
+        control_status="stable" if ready else "degraded",
+        review_required=not ready,
+    )
+    return command_state.snapshot()

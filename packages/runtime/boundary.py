@@ -28,6 +28,8 @@ class RuntimeState:
     next_action: str | None = None
     session_id: str = "local-shell"
     workspace_status: str = "idle"
+    command_count: int = 0
+    last_command: str | None = None
     updated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
@@ -40,6 +42,8 @@ def readiness_snapshot(boundary: RuntimeBoundary, state: RuntimeState) -> dict:
         "execution_graph_enabled": boundary.execution_graph_enabled,
         "session_id": state.session_id,
         "workspace_status": state.workspace_status,
+        "command_count": state.command_count,
+        "last_command": state.last_command,
         "objective": state.objective,
         "next_action": state.next_action,
         "updated_at": state.updated_at,

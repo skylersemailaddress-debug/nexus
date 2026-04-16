@@ -1,15 +1,15 @@
 # Launch Readiness Report
 
-## Tranche: First Interactive Nexus Shell
+## Tranche: Autobuilder Proof Command Session Flow
 Date: 2026-04-16
 Branch: main
 
 ### Completed
-- Runnable web shell now renders linked workspace, system, and activity panels.
-- Deterministic local API service in apps/api now serves /health, /readiness, /version, /session/status, and /workspace/status.
-- Runtime boundary and runtime service now surface composed session and workspace state into the API flow.
-- Control-plane and execution-graph expose initial control/run session models for checkpoint, approval, phase, and task visibility.
-- Deterministic unit tests cover shell wiring, API status behavior, and module coherence across the new flow.
+- Runnable web shell composer now submits deterministic command payloads and renders request, response, and session state in workspace panels.
+- Deterministic local API service now includes POST /session/command alongside status surfaces.
+- Runtime boundary and runtime service now track command_count and last_command and return structured session command payloads.
+- Control-plane and execution-graph now expose simple command/session tracking models for control and run/task state.
+- Deterministic unit tests cover API command flow, request/response shape, shell integration assumptions, and package coherence.
 
 ### Validation Gates
 - scripts/validate_local.sh
@@ -17,6 +17,6 @@ Branch: main
 - scripts/package_release.sh
 
 ### Residual Gaps
-- Workspace flow is read-only and intentionally deterministic.
+- Command flow is deterministic and intentionally non-executing.
 - Runtime and execution graph remain foundation-level and do not yet execute real orchestration.
-- API endpoints remain intentionally minimal in this tranche and do not mutate project state.
+- API endpoints remain intentionally minimal and safe for local shell proofing.

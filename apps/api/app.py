@@ -36,7 +36,7 @@ class NexusAPIHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
@@ -80,6 +80,39 @@ class NexusAPIHandler(BaseHTTPRequestHandler):
             return
 
         self._write_json({"ok": False, "error": "not-found", "path": parsed.path}, status=HTTPStatus.NOT_FOUND)
+
+    def do_POST(self) -> None:  # noqa: N802
+        state: ApiState = self.server.api_state  # type: ignore[attr-defined]
+        parsed = urlparse(self.path)
+
+        if parsed.path != "/session/command":
+            self._write_json({"ok": False, "error": "not-found", "path": parsed.path}, status=HTTPStatus.NOT_FOUND)
+            return
+
+        try:
+            payload = self._read_json_body()
+        except ValueError:
+            self._write_json({"ok": False, "error": "invalid-json"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        command = str(payload.get("command", "")).strip()
+        if not command:
+            self._write_json({"ok": False, "error": "command-required"}, status=HTTPStatus.BAD_REQUEST)
+            return
+
+        self._write_json(build_session_command(state, command=command))
+
+    def _read_json_body(self) -> dict:
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length <= 0:
+            return {}
+        raw_body = self.rfile.read(content_length)
+        if not raw_body:
+            return {}
+        parsed = json.loads(raw_body.decode("utf-8"))
+        if not isinstance(parsed, dict):
+            raise ValueError("JSON body must be an object")
+        return parsed
 
     def log_message(self, format: str, *args) -> None:  # noqa: A003
         # Keep tests and local runs deterministic and quiet.
@@ -186,6 +219,31 @@ def build_session_status(state: ApiState, objective: str | None = None) -> dict:
         }
     )
     return status_payload
+
+
+def build_session_command(state: ApiState, command: str) -> dict:
+    repo_root = state.repo_root or Path(__file__).resolve().parents[2]
+    runtime_service = state.runtime_service or build_runtime_service()
+    command_id = f"cmd-{runtime_service.state.command_count + 1:04d}"
+
+    control_module = _control_plane_status_module(str(repo_root))
+    execution_module = _execution_graph_run_module(str(repo_root))
+
+    control_state = control_module.command_control_snapshot(command_id=command_id, ready=state.ready)
+    run_state = execution_module.build_command_run_state(
+        command_id=command_id,
+        command_text=command,
+        ready=state.ready,
+    ).snapshot()
+
+    command_payload = runtime_service.submit_command(command, control_state, run_state)
+    command_payload.update(
+        {
+            "service": "nexus-api",
+            "version": state.version,
+        }
+    )
+    return command_payload
 
 
 def build_runtime_service() -> RuntimeService:

@@ -35,7 +35,10 @@ class WebShellStructureTests(unittest.TestCase):
         self.assertIn('"/readiness"', shell_js)
         self.assertIn('"/version"', shell_js)
         self.assertIn('"/session/status"', shell_js)
+        self.assertIn('"/session/command"', shell_js)
         self.assertIn('"/workspace/status', shell_js)
+        self.assertIn('method: "POST"', shell_js)
+        self.assertIn("request.command_id", shell_js)
 
 
 if __name__ == "__main__":
