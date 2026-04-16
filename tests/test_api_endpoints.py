@@ -58,7 +58,18 @@ class ApiEndpointTests(unittest.TestCase):
         self.assertEqual(payload["runtime"]["workspace_status"], "active")
         self.assertEqual(payload["control"]["checkpoint_status"], "primed")
         self.assertEqual(payload["execution"]["status"], "active")
+        self.assertIn("session_status", payload)
         self.assertEqual(headers.get("Access-Control-Allow-Origin"), "*")
+
+    def test_session_status(self) -> None:
+        status, payload, _ = self._get("/session/status?objective=Open%20plan")
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["version"], "0.0.1-test")
+        self.assertEqual(payload["session"]["objective"], "Open plan")
+        self.assertEqual(payload["session"]["workspace_status"], "active")
+        self.assertEqual(payload["control"]["checkpoint_status"], "primed")
+        self.assertEqual(payload["execution"]["phase"], "execution")
 
 
 if __name__ == "__main__":

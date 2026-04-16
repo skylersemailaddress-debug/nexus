@@ -74,6 +74,11 @@ class NexusAPIHandler(BaseHTTPRequestHandler):
             self._write_json(build_workspace_status(state, objective=objective))
             return
 
+        if parsed.path == "/session/status":
+            objective = query.get("objective", [None])[0]
+            self._write_json(build_session_status(state, objective=objective))
+            return
+
         self._write_json({"ok": False, "error": "not-found", "path": parsed.path}, status=HTTPStatus.NOT_FOUND)
 
     def log_message(self, format: str, *args) -> None:  # noqa: A003
@@ -129,11 +134,17 @@ def build_workspace_status(state: ApiState, objective: str | None = None) -> dic
         status="active" if state.ready else "blocked",
     )
 
+    session_status = runtime_service.session_status(
+        control_module.session_control_snapshot(control_state),
+        execution_module.build_run_session_state(run_state).snapshot(),
+    )
+
     workspace = runtime_service.workspace_status(control_state.snapshot(), run_state.snapshot())
     workspace.update(
         {
             "service": "nexus-api",
             "version": state.version,
+            "session_status": session_status,
             "session": {
                 "session_id": runtime_snapshot["session_id"],
                 "objective": runtime_snapshot["objective"],
@@ -142,6 +153,39 @@ def build_workspace_status(state: ApiState, objective: str | None = None) -> dic
         }
     )
     return workspace
+
+
+def build_session_status(state: ApiState, objective: str | None = None) -> dict:
+    repo_root = state.repo_root or Path(__file__).resolve().parents[2]
+    runtime_service = state.runtime_service or build_runtime_service()
+    runtime_snapshot = runtime_service.activate_session(objective)
+
+    control_module = _control_plane_status_module(str(repo_root))
+    control_state = control_module.ControlPlaneState(
+        approvals_pending=0,
+        approvals_required=False,
+        checkpoint_status="primed" if state.ready else "blocked",
+        control_status="stable" if state.ready else "degraded",
+    )
+
+    execution_module = _execution_graph_run_module(str(repo_root))
+    run_state = execution_module.build_run_state(
+        objective=runtime_snapshot["objective"] or "Nexus build workspace",
+        task_ids=["probe-api-surface", "render-shell-status"],
+        status="active" if state.ready else "blocked",
+    )
+
+    status_payload = runtime_service.session_status(
+        control_module.session_control_snapshot(control_state),
+        execution_module.build_run_session_state(run_state).snapshot(),
+    )
+    status_payload.update(
+        {
+            "service": "nexus-api",
+            "version": state.version,
+        }
+    )
+    return status_payload
 
 
 def build_runtime_service() -> RuntimeService:

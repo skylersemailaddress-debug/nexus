@@ -34,6 +34,7 @@ class WebShellStructureTests(unittest.TestCase):
         self.assertIn('"/health"', shell_js)
         self.assertIn('"/readiness"', shell_js)
         self.assertIn('"/version"', shell_js)
+        self.assertIn('"/session/status"', shell_js)
         self.assertIn('"/workspace/status', shell_js)
 
 

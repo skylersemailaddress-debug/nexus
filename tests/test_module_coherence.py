@@ -38,6 +38,23 @@ class ModuleCoherenceTests(unittest.TestCase):
         self.assertEqual(workspace["control"]["control_status"], "stable")
         self.assertEqual(workspace["execution"]["status"], "active")
 
+    def test_runtime_composes_session_status(self) -> None:
+        boundary = RuntimeBoundary(
+            authority_owner="nexus",
+            durable_store="postgres",
+            control_plane_enabled=True,
+            execution_graph_enabled=True,
+        )
+        service = RuntimeService(boundary=boundary, state=RuntimeState())
+        service.activate_session("Session flow")
+        session = service.session_status(
+            {"approval_status": "clear", "checkpoint_status": "primed"},
+            {"status": "active", "phase": "execution", "task_count": 2},
+        )
+        self.assertTrue(session["ok"])
+        self.assertEqual(session["control"]["approval_status"], "clear")
+        self.assertEqual(session["execution"]["phase"], "execution")
+
     def test_control_plane_module_loads(self) -> None:
         root = Path(__file__).resolve().parents[1]
         module_path = root / "packages" / "control-plane" / "approvals.py"
@@ -63,6 +80,8 @@ class ModuleCoherenceTests(unittest.TestCase):
         snapshot = state.snapshot()
         self.assertEqual(snapshot["approvals_pending"], 1)
         self.assertTrue(snapshot["approvals_required"])
+        session_snapshot = module.session_control_snapshot(state)
+        self.assertEqual(session_snapshot["approval_status"], "waiting")
 
     def test_execution_graph_module_shape(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -79,6 +98,8 @@ class ModuleCoherenceTests(unittest.TestCase):
         self.assertEqual(snapshot["task_count"], 1)
         run_state = run_plan.to_run_state(status="active")
         self.assertEqual(run_state.snapshot()["status"], "active")
+        run_session = module.build_run_session_state(run_state)
+        self.assertEqual(run_session.snapshot()["phase"], "execution")
 
 
 if __name__ == "__main__":

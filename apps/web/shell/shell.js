@@ -13,6 +13,7 @@ const activityFeed = document.getElementById("activityFeed");
 const workspaceRoot = "./";
 const apiBaseUrl = "http://127.0.0.1:8085";
 const workspaceStatusPath = "/workspace/status";
+const sessionStatusPath = "/session/status";
 const activityLog = [];
 
 function escapeHtml(value) {
@@ -57,6 +58,9 @@ function renderWorkspaceStatus(payload) {
   const runtime = payload.runtime || {};
   const control = payload.control || {};
   const execution = payload.execution || {};
+  const sessionStatus = payload.session_status || {};
+  const sessionControl = sessionStatus.control || {};
+  const sessionExecution = sessionStatus.execution || {};
 
   contextTitle.textContent = payload.session?.objective || runtime.objective || "Nexus Build";
   workspaceStateBadge.textContent = runtime.workspace_status || "idle";
@@ -67,6 +71,7 @@ function renderWorkspaceStatus(payload) {
     statusCard("Objective", runtime.objective || "Nexus build workspace", runtime.next_action || "Awaiting next action."),
     statusCard("Execution", execution.status || "planned", `${execution.task_count || 0} tasks in run ${execution.run_id || "run-idle"}`),
     statusCard("Control", control.control_status || "stable", `Checkpoint ${control.checkpoint_status || "primed"}`),
+    statusCard("Session Phase", sessionExecution.phase || "intake", `Approval ${sessionControl.approval_status || "clear"}`),
   ].join("");
 
   systemStatusPanel.innerHTML = [
@@ -74,6 +79,12 @@ function renderWorkspaceStatus(payload) {
     statusCard("Readiness", payload.ok ? "ready" : "blocked", `Session ${runtime.session_id || "local-shell"}`),
     statusCard("Workspace Root", workspaceRoot, runtime.updated_at || "pending"),
   ].join("");
+}
+
+function renderSessionStatus(payload) {
+  const session = payload.session || {};
+  contextTitle.textContent = session.objective || contextTitle.textContent || "Nexus Build";
+  workspaceStateBadge.textContent = session.workspace_status || "idle";
 }
 
 function renderSystemFallback(health, readiness, version) {
@@ -110,15 +121,17 @@ async function fetchJson(path) {
 
 async function refreshWorkspaceStatus(objective) {
   try {
-    const [health, readiness, version, workspace] = await Promise.all([
+    const [health, readiness, version, session, workspace] = await Promise.all([
       fetchJson("/health"),
       fetchJson("/readiness"),
       fetchJson("/version"),
+      fetchJson(`${sessionStatusPath}${objective ? `?objective=${encodeURIComponent(objective)}` : ""}`),
       fetchJson(`${workspaceStatusPath}${objective ? `?objective=${encodeURIComponent(objective)}` : ""}`),
     ]);
     renderSystemFallback(health, readiness, version);
+    renderSessionStatus(session);
     renderWorkspaceStatus(workspace);
-    pushActivity("Workspace linked", workspace.session?.objective || "Nexus build workspace");
+    pushActivity("Workspace linked", session.session?.objective || workspace.session?.objective || "Nexus build workspace");
   } catch (_) {
     renderOfflineState();
     pushActivity("Shell running locally", "API status surface not reachable.");

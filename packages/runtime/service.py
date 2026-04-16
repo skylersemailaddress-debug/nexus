@@ -28,6 +28,21 @@ class RuntimeService:
     def status(self) -> dict:
         return readiness_snapshot(self.boundary, self.state)
 
+    def session_status(self, control_state: dict, run_state: dict) -> dict:
+        runtime_status = self.status()
+        return {
+            "ok": runtime_status["ok"],
+            "session": {
+                "session_id": runtime_status["session_id"],
+                "objective": runtime_status["objective"],
+                "next_action": runtime_status["next_action"],
+                "workspace_status": runtime_status["workspace_status"],
+            },
+            "control": dict(control_state),
+            "execution": dict(run_state),
+            "runtime_updated_at": runtime_status["updated_at"],
+        }
+
     def workspace_status(self, control_state: dict, run_state: dict) -> dict:
         runtime_status = self.status()
         return {
