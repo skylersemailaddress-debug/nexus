@@ -5,6 +5,7 @@ const hiddenUpload = document.getElementById("hiddenUpload");
 const surfaceLayer = document.getElementById("surfaceLayer");
 const helpDrawer = document.getElementById("helpDrawer");
 const contextTitle = document.getElementById("contextTitle");
+const workspaceRoot = "./";
 
 function makeSurface(title, body) {
   const section = document.createElement("section");
@@ -26,9 +27,25 @@ function runObjective(prompt) {
   contextTitle.textContent = prompt || "Nexus Build";
   const body = `
     <div class="mini-surface"><strong>Objective</strong><p>${prompt}</p></div>
+    <div class="mini-surface"><strong>Workspace</strong><p>${workspaceRoot}</p></div>
     <div class="mini-surface"><strong>Status</strong><p>Reference mode. Runtime wiring intentionally disabled in donor pull.</p></div>
   `;
   surfaceLayer.prepend(makeSurface("Execution Surface", body));
+}
+
+async function probeApiHealth() {
+  try {
+    const res = await fetch("http://127.0.0.1:8085/health");
+    if (!res.ok) return;
+    const payload = await res.json();
+    const body = `
+      <div class="mini-surface"><strong>API Health</strong><p>${payload.status}</p></div>
+      <div class="mini-surface"><strong>Service</strong><p>${payload.service}</p></div>
+    `;
+    surfaceLayer.prepend(makeSurface("System Surface", body));
+  } catch (_) {
+    // API service is optional during shell-only runs.
+  }
 }
 
 function sendPrompt(seed) {
@@ -63,3 +80,5 @@ hiddenUpload.addEventListener("change", () => {
   if (!file) return;
   runObjective(`Uploaded: ${file.name}`);
 });
+
+probeApiHealth();

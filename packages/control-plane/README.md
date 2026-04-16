@@ -7,6 +7,7 @@ Current scaffold modules:
 - checkpoint payload builder pattern
 - registry capability seed loader
 - database connection wrappers and reset runner helper
+- approvals boundary primitives
 
 Scope:
 - source adapted from NexusV3 donor clean control files

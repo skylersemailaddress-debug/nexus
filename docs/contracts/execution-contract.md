@@ -12,6 +12,11 @@ Specifies execution graph behavior and orchestration obligations.
 - checkpoint resolver behavior: fill gaps only and never override live state
 - compression summary behavior: scaffold allowed, but production summarization must replace placeholder text
 
+## Implemented In This Tranche
+- packages/execution-graph/run.py provides RunPlan shape and task registration.
+- packages/execution-graph/task.py provides deterministic task execution placeholder.
+- packages/execution-graph/checkpoint.py provides checkpoint envelope shape.
+
 ## Forbidden Patterns
 - parallel primary execution roots
 - hidden side-effect execution outside the declared graph path

@@ -35,4 +35,11 @@ for rel in "${required_files[@]}"; do
   fi
 done
 
+if [[ ! -d "$ROOT_DIR/tests" ]]; then
+  printf 'Missing tests directory.\n' >&2
+  exit 1
+fi
+
+python -m unittest discover -s "$ROOT_DIR/tests" -p 'test_*.py'
+
 printf 'Validation passed: required scaffold files are present.\n'

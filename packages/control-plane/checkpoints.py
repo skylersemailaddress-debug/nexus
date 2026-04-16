@@ -7,6 +7,9 @@ from uuid import uuid4
 
 
 def build_checkpoint_payload(project_state: dict) -> dict:
+    if not isinstance(project_state, dict):
+        return {"ok": False, "error": "invalid-project-state"}
+
     objective = project_state.get("objective")
     next_step = project_state.get("next_step")
     blockers = project_state.get("blockers", [])
@@ -35,6 +38,11 @@ def build_checkpoint_payload(project_state: dict) -> dict:
 
 
 def create_checkpoint_record(project_id: str, payload: dict) -> dict:
+    if not project_id:
+        return {"ok": False, "error": "missing-project-id"}
+    if not payload.get("ok"):
+        return {"ok": False, "error": "invalid-payload"}
+
     return {
         "ok": True,
         "checkpoint": {

@@ -11,4 +11,11 @@ def registry_capabilities(seed_path: Path) -> list[dict]:
         return []
 
     data = json.loads(seed_path.read_text(encoding="utf-8"))
-    return data if isinstance(data, list) else []
+    if not isinstance(data, list):
+        return []
+
+    capabilities: list[dict] = []
+    for item in data:
+        if isinstance(item, dict) and item.get("id"):
+            capabilities.append(item)
+    return capabilities

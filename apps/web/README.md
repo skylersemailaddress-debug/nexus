@@ -16,3 +16,16 @@ Implemented reference shell files:
 - shell/adaptive/*
 
 These files are intentionally framework-free and not wired to production runtime APIs.
+
+## Run Local Web Shell
+```bash
+python -m apps.web.app
+```
+
+Default bind:
+- http://127.0.0.1:8090
+
+Foundation intent:
+- sparse workspace-first shell
+- premium visual direction with minimal clutter
+- control surface centered on composer and summoned surfaces
