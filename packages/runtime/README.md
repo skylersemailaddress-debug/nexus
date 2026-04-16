@@ -1,3 +1,7 @@
-# Runtime Package Placeholder
+# Runtime Package
 
-Reserved for Nexus0.5 runtime subsystem implementation.
+Runtime package remains the authority boundary for orchestration and execution lifecycle.
+
+Current status:
+- donor runtime boundary ideas were imported into docs/contracts
+- implementation remains scoped and contract-first

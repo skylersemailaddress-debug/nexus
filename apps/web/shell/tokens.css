@@ -1,0 +1,14 @@
+:root {
+  --nexus-bg: #0b1020;
+  --nexus-panel: #121935;
+  --nexus-panel-2: #182145;
+  --nexus-text: #eef3ff;
+  --nexus-muted: #aab6da;
+  --nexus-border: #2c396d;
+  --nexus-accent: #7aa2ff;
+  --nexus-success: #5fd0a5;
+  --nexus-warning: #ffd36c;
+  --nexus-danger: #ff8d8d;
+  --nexus-radius: 18px;
+  --nexus-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}

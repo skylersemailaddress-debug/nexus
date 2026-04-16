@@ -1,3 +1,9 @@
-# Execution Graph Package Placeholder
+# Execution Graph Package
 
-Reserved for Nexus0.5 execution-graph subsystem implementation.
+This package contains controlled donor-derived checkpoint policy scaffolds.
+
+Current scaffold modules:
+- checkpoint_policy.py
+- checkpoint_resolver.py
+
+These modules are intentionally minimal and designed for incremental contract-aligned expansion.

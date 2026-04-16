@@ -1,0 +1,84 @@
+#nexus-adaptive-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.nexus-panel {
+  position: absolute;
+  border-radius: 22px;
+  padding: 12px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  transition:
+    left 0.45s ease,
+    top 0.45s ease,
+    width 0.35s ease,
+    height 0.35s ease,
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    opacity 0.28s ease;
+  pointer-events: auto;
+  color: #eef2ff;
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.nexus-panel.urgent {
+  background: rgba(127, 29, 29, 0.86);
+  box-shadow: 0 18px 60px rgba(127, 29, 29, 0.34);
+}
+
+.nexus-panel.important {
+  background: rgba(30, 58, 138, 0.86);
+}
+
+.nexus-panel.verification {
+  background: rgba(55, 48, 163, 0.86);
+}
+
+.nexus-panel.memory {
+  background: rgba(67, 56, 202, 0.86);
+}
+
+.nexus-panel:hover {
+  transform: translateY(-2px) scale(1.01);
+}
+
+.nexus-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.nexus-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.nexus-panel-subtitle {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.nexus-panel-badges {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.nexus-panel-badges span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nexus-panel-body {
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.95;
+}

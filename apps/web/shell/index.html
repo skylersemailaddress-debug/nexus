@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nexus App Shell Reference</title>
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./shell.css" />
+  <link rel="stylesheet" href="./adaptive/adaptive-shell.css" />
+</head>
+<body>
+  <div class="desk" id="desk">
+    <header class="context-strip">
+      <div>
+        <span class="context-label">Working on</span>
+        <strong id="contextTitle">Nexus Build</strong>
+      </div>
+      <div class="context-meta">
+        <span class="status-pill">Reference</span>
+      </div>
+    </header>
+
+    <main class="surface-layer" id="surfaceLayer">
+      <section class="surface card intro-surface" data-surface="welcome">
+        <div class="surface-header">
+          <h1>Nexus Dock</h1>
+          <button class="ghost-button" data-action="show-help">What can I do?</button>
+        </div>
+        <p class="surface-copy">
+          Chat is the control surface. Documents, previews, approvals, and results appear only when invoked.
+        </p>
+        <div class="quick-actions">
+          <button class="quick-chip" data-seed="Build the app">Build the app</button>
+          <button class="quick-chip" data-seed="Open the latest plan">Open plan</button>
+          <button class="quick-chip" data-seed="Show validator results">Validate</button>
+          <button class="quick-chip" data-seed="Continue where we left off">Continue</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="drawer hidden" id="helpDrawer">
+      <div class="drawer-card">
+        <div class="surface-header">
+          <h2>Suggested actions</h2>
+          <button class="ghost-button" data-action="close-help">Close</button>
+        </div>
+        <ul class="help-list">
+          <li>Build a new app from the current spec.</li>
+          <li>Open a generated file or report.</li>
+          <li>Compare two outputs.</li>
+          <li>Run validation and inspect failures.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <footer class="composer-shell">
+      <button class="upload-button" id="uploadButton" type="button">Upload</button>
+      <div class="composer-wrap">
+        <input id="composerInput" class="composer-input" placeholder="Ask Nexus to build, compare, fix, deploy, or continue..." />
+        <div class="command-aura" id="commandAura">
+          <button class="aura-chip" data-seed="Build the full app">Build</button>
+          <button class="aura-chip" data-seed="Show latest output">Output</button>
+          <button class="aura-chip" data-seed="Run validation">Validate</button>
+        </div>
+      </div>
+      <button class="send-button" id="sendButton" type="button">Send</button>
+    </footer>
+  </div>
+
+  <input id="hiddenUpload" type="file" hidden />
+  <script src="./shell.js"></script>
+  <script src="./adaptive/ui-store.js"></script>
+  <script src="./adaptive/layout-engine.js"></script>
+  <script src="./adaptive/panel-engine.js"></script>
+  <script src="./adaptive/state-stream.js"></script>
+  <script src="./adaptive/adaptive-shell.js"></script>
+</body>
+</html>
